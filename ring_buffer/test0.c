@@ -1,5 +1,6 @@
 #include "ring_buffer.h"
 #include <stdio.h>
+#include <string.h>
 #include <pthread.h>
 
 typedef struct{
@@ -31,6 +32,7 @@ void *thread_function()
 
 int main()
 {
+    void *p;
 	int ret;
 	int mem_req;
 	int rs = 100;
@@ -41,8 +43,8 @@ int main()
 	printf("mem_req: %d\n", mem_req);
 	
 	// rb_create
-	ret = rb_create(rs, sizeof(POINT), pbuf);
-	if(!ret){
+	p = rb_create(rs, sizeof(POINT), pbuf);
+	if(!p){
 		printf("rb_create fail\n");
 		return -1;
 	}

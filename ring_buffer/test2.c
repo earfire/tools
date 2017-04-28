@@ -30,9 +30,9 @@ int count = 0;
 typedef struct {
 	sem_t rb_sem;
 	volatile int waiting;
-} RBEVENT;
+} RBEV;
 
-RBEVENT ev;
+RBEV rbev;
 
 #define RBEV_INIT(ev) {sem_init(&((ev).rb_sem), 0, 0); (ev).waiting = 0;}
 #define RBEV_WAIT(ev) {sem_wait(&((ev).rb_sem));}
@@ -69,11 +69,11 @@ void *thread_function()
 			// 等待标志位置位，并判断old_value
 			// 1. old_value == 0 说明等待标志位没有被置位
 			// 2. old_value != 0 说明等待标志位已被置位
-		/*	old_value = test_and_set_bit(0, &(ev.waiting));
+		/*	old_value = test_and_set_bit(0, &(rbev.waiting));
 			if(old_value == 0)
 			{
 				// 需要等待信号到来
-				sem_wait(&(ev.rb_sem));
+				sem_wait(&(rbev.rb_sem));
 				printf("do sem_wait\n");
 				continue;
 			}
@@ -89,12 +89,12 @@ void *thread_function()
 				continue;
 			}
 
-			ev.waiting = 1;
-			sem_wait(&(ev.rb_sem));
+			rbev.waiting = 1;
+			sem_wait(&(rbev.rb_sem));
 		}
 		else
 		{
-			ev.waiting = 0;
+			rbev.waiting = 0;
 		}
 		c = 0;
 	/*	{
@@ -125,7 +125,7 @@ int main()
 	int ret;
 	int rs = 10000;
 	pthread_t thread_id;
-	ev.waiting = 0;
+	rbev.waiting = 0;
 	
 	if(signal(SIGINT, sig_handler) == SIG_ERR)
 	{   
@@ -149,7 +149,7 @@ int main()
 	}
 
 	// RBEV_INIT
-	RBEV_INIT(ev);
+	RBEV_INIT(rbev);
 
 	// rb_canWrite
 	gettimeofday(&tv1, NULL);
@@ -166,15 +166,15 @@ int main()
 
 		rb_writeInValue(pbuf, POINT, *p_point);
 		
-		if(ev.waiting == 1)
+		if(rbev.waiting == 1)
 		{
-			sem_post(&(ev.rb_sem));
+			sem_post(&(rbev.rb_sem));
 			printf("do sem_post\n");
 		}
-	/*	if(test_and_clear_bit(0, &(ev.waiting)) != 0)		// 如果等待标识位置位，则唤醒
+	/*	if(test_and_clear_bit(0, &(rbev.waiting)) != 0)		// 如果等待标识位置位，则唤醒
 		{
 			printf("do sem_post\n");
-			sem_post(&(ev.rb_sem));
+			sem_post(&(rbev.rb_sem));
 		}*/
 
 	#ifdef DELAY
