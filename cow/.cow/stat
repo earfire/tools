@@ -1,0 +1,10 @@
+{
+	"update": "2021-12-04",
+	"site_info": {
+		"api.github.com": {
+			"direct": 1,
+			"block": 0,
+			"recent": "2021-12-01"
+		}
+	}
+}
